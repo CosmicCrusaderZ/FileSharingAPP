@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileSync - Realtime File Sharing</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-sync-alt"></i>
+                <h1>FileSync</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li class="active"><i class="fas fa-home"></i> Home</li>
+                    <li><i class="fas fa-history"></i> Recent</li>
+                    <li><i class="fas fa-star"></i> Favorites</li>
+                    <li><i class="fas fa-users"></i> Shared</li>
+                    <li><i class="fas fa-cog"></i> Settings</li>
+                </ul>
+            </nav>
+            <div class="theme-toggle">
+                <span>Theme</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search files...">
+                </div>
+                <div class="user-info">
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="user">
+                        <img src="https://via.placeholder.com/32" alt="User">
+                        <span>User123</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Room Info -->
+                <div class="room-info">
+                    <h2>Your Room: <span id="room-id">None</span></h2>
+                    <div class="room-actions">
+                        <button id="create-room-btn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create Room
+                        </button>
+                        <button id="join-room-btn" class="btn">
+                            <i class="fas fa-sign-in-alt"></i> Join Room
+                        </button>
+                        <div class="room-join">
+                            <input type="text" id="room-input" placeholder="Enter room ID">
+                            <button id="join-confirm-btn" class="btn btn-small">Join</button>
+                        </div>
+                    </div>
+                    
+                    <div class="connected-peers">
+                        <h3>Connected Peers: <span id="peer-count">0</span></h3>
+                        <div id="peer-list" class="peer-list"></div>
+                    </div>
+                </div>
+
+                <!-- Upload Area -->
+                <div class="upload-area" id="drop-area">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>Drag & Drop Files Here</h3>
+                    <p>or</p>
+                    <label for="file-input" class="btn btn-primary">Select Files</label>
+                    <input type="file" id="file-input" multiple hidden>
+                </div>
+
+                <!-- Transfers -->
+                <div class="transfers">
+                    <div class="transfers-header">
+                        <h3>Transfers</h3>
+                        <div class="filters">
+                            <span class="active">All</span>
+                            <span>Uploading</span>
+                            <span>Downloading</span>
+                            <span>Completed</span>
+                        </div>
+                    </div>
+                    <div id="transfer-list" class="transfer-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Collaboration Panel (hidden by default) -->
+        <div class="collaboration-panel hidden" id="collab-panel">
+            <div class="panel-header">
+                <h3>Collaboration Tools</h3>
+                <button id="close-collab-btn" class="btn-icon">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="panel-tabs">
+                <div class="tab active" data-tab="chat">Chat</div>
+                <div class="tab" data-tab="whiteboard">Whiteboard</div>
+                <div class="tab" data-tab="editor">Text Editor</div>
+            </div>
+            <div class="panel-content">
+                <!-- Chat Tab -->
+                <div class="tab-content active" id="chat-tab">
+                    <div class="chat-messages" id="chat-messages"></div>
+                    <div class="chat-input">
+                        <input type="text" id="message-input" placeholder="Type a message...">
+                        <button id="send-message-btn" class="btn-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Whiteboard Tab -->
+                <div class="tab-content" id="whiteboard-tab">
+                    <canvas id="whiteboard"></canvas>
+                    <div class="whiteboard-tools">
+                        <button class="tool-btn active" data-tool="pen">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="tool-btn" data-tool="eraser">
+                            <i class="fas fa-eraser"></i>
+                        </button>
+                        <button class="tool-btn" data-tool="clear">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <input type="color" id="color-picker" value="#000000">
+                    </div>
+                </div>
+
+                <!-- Text Editor Tab -->
+                <div class="tab-content" id="editor-tab">
+                    <div id="text-editor" contenteditable="true"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <!-- Settings Modal -->
+        <div class="modal" id="settings-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h3>Appearance</h3>
+                        <div class="setting-item">
+                            <span>Dark Mode</span>
+                            <label class="switch">
+                                <input type="checkbox" id="dark-mode-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span>Language</span>
+                            <select id="language-select">
+                                <option value="en">English</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                                <option value="zh">Chinese</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>Security</h3>
+                        <div class="setting-item">
+                            <span>End-to-End Encryption</span>
+                            <label class="switch">
+                                <input type="checkbox" id="encryption-toggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span>File Expiration</span>
+                            <select id="expiration-select">
+                                <option value="never">Never</option>
+                                <option value="1h">1 Hour</option>
+                                <option value="24h">24 Hours</option>
+                                <option value="7d">7 Days</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>Notifications</h3>
+                        <div class="setting-item">
+                            <span>Enable Notifications</span>
+                            <label class="switch">
+                                <input type="checkbox" id="notifications-toggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span>Sound Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" id="sound-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" id="reset-settings-btn">Reset to Defaults</button>
+                    <button class="btn btn-primary" id="save-settings-btn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Preview Modal -->
+        <div class="modal" id="preview-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="preview-filename">File Preview</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="preview-container"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" id="preview-download-btn">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- JavaScript -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
